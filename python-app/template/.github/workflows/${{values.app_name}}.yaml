@@ -64,6 +64,13 @@ jobs:
       - name: Ensure argocd repo and app
         shell: bash
         run: |
+          # Login to ArgoCD first
+          argocd login ${{ '${{ secrets.ARGOCD_SERVER }}' }} \
+            --username ${{ '${{ secrets.ARGOCD_USERNAME }}' }} \
+            --password ${{ '${{ secrets.ARGOCD_PASSWORD }}' }} \
+            --grpc-web \
+            --insecure
+          
           # Connect the argocd repo if not already connected
           repo=https://github.com/partedwaves/${{values.app_name}}.git
           argocd repo list | grep  -q $repo || argocd repo add $repo
@@ -82,10 +89,10 @@ jobs:
       - name: Argocd app sync
         shell: bash
         run: |
-          argocd login argocd-server.argocd \
+          argocd login ${{ '${{ secrets.ARGOCD_SERVER }}' }} \
             --insecure  \
             --grpc-web \
-            --username admin \
+            --username ${{ '${{ secrets.ARGOCD_USERNAME }}' }} \
             --password  ${{ '${{ secrets.ARGOCD_PASSWORD }}' }}
           argocd app sync ${{values.app_name}}
           argocd app wait ${{values.app_name}} --timeout 180
