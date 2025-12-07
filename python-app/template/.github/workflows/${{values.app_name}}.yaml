@@ -77,9 +77,7 @@ jobs:
             --values values-${{values.app_env}}.yaml \
             --revision main \
             --sync-policy manual \
-            --sync-option CreateNamespace=true \
-            --self-heal \
-            --auto-prune
+            --sync-option CreateNamespace=true
       
       - name: Argocd app sync
         shell: bash
