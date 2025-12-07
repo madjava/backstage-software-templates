@@ -54,28 +54,30 @@ jobs:
         with:
           message: 'Updates values.yaml with commit ${{ '${{needs.ci.outputs.commit_id}}' }}'
 
-      - name: Install argocd
+      - name: Install ArgoCD
         shell: bash
         run: |
           curl -ksSL -o argocd https://argocd-server.argocd/download/argocd-linux-amd64
           chmod +x argocd
           sudo mv ./argocd /usr/local/bin/argocd
       
-      - name: Ensure argocd repo and app
+      - name: Login to ArgoCD
         shell: bash
         run: |
-          # Login to ArgoCD first
           argocd login ${{ '${{ secrets.ARGOCD_SERVER }}' }} \
             --username ${{ '${{ secrets.ARGOCD_USERNAME }}' }} \
             --password ${{ '${{ secrets.ARGOCD_PASSWORD }}' }} \
             --grpc-web \
             --insecure
-          
-          # Connect the argocd repo if not already connected
+
+      - name: Create App in ArgoCD
+        shell: bash
+        run: |          
+          # Connect the ArgoCD repo if not already connected
           repo=https://github.com/partedwaves/${{values.app_name}}.git
           argocd repo list | grep  -q $repo || argocd repo add $repo
 
-          # Create the argocd app if it does not exist
+          # Create the ArgoCD app if it does not exist
           argocd app get ${{values.app_name}} || argocd app create ${{values.app_name}} \
             --repo $repo \
             --path charts/${{values.app_name}} \
@@ -86,13 +88,8 @@ jobs:
             --sync-policy manual \
             --sync-option CreateNamespace=true
       
-      - name: Argocd app sync
+      - name: ArgoCD App Sync
         shell: bash
         run: |
-          argocd login ${{ '${{ secrets.ARGOCD_SERVER }}' }} \
-            --insecure  \
-            --grpc-web \
-            --username ${{ '${{ secrets.ARGOCD_USERNAME }}' }} \
-            --password  ${{ '${{ secrets.ARGOCD_PASSWORD }}' }}
           argocd app sync ${{values.app_name}}
           argocd app wait ${{values.app_name}} --timeout 180
