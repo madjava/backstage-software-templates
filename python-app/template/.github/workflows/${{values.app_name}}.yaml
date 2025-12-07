@@ -76,7 +76,7 @@ jobs:
             --dest-namespace ${{values.app_env}} \
             --values values-${{values.app_env}}.yaml \
             --revision main \
-            --sync-policy automated \
+            --sync-policy manual \
             --sync-option CreateNamespace=true \
             --self-heal \
             --auto-prune
