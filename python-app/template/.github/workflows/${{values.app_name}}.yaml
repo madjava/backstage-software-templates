@@ -41,16 +41,12 @@ jobs:
       - name: Install Libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-pip yq python3-venv
-          export VIRTUAL_ENV=/opt/venv
-          python3 -m venv $VIRTUAL_ENV
-          export PATH="$VIRTUAL_ENV/bin:$PATH"
+          sudo apt-get install -y python3 python3-pip yq
       
       - name: Modify values file
         shell: bash
         run: |
           echo ${{ '${{needs.ci.outputs.commit_id}}' }}
-          pip install yq
           yq -Yi '.image.tag = "${{ '${{needs.ci.outputs.commit_id}}' }}"' charts/${{values.app_name}}/values-${{values.app_env}}.yaml
 
       - name: Commit changes
